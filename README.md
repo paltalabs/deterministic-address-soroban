@@ -16,21 +16,50 @@ make build
 make test
 ```
 
-Questions.-
+**Note:** All of the tests refered in this README are inside `deployer/deployer/test.rs`
 
-1.- Can a deployer deploys 2 contracts with same WASM and different salt?: Yes!
-Check test_deploy_from_contract_twice_same_wasm_different_salt
+# Questions to answer
 
-2.- Can a deployer deploys 2 contracts with same WASM and same salt?: No!
+## 1. Same WASM, different salt ✅
 
-3.- Can a deployer deploys 2 different contracts (different WASM) with same salt? NO!
-Check: test_deploy_from_contract_different_wasm_same_salt_should_panic
-This proves that in fact the contract addresses do not depend on the WASM, but on the combination of address&salt.
+Can a deployer deploy 2 contracts with same WASM and different salt?
 
-4.- Can one deployer deploys a (wasm/salt) and another deployer deploys the same (wasm/salt)? Yes!
+Answer: **✅ Yes!**
+
+Check `test_deploy_from_contract_twice_same_wasm_different_salt`
+
+## 2. Same WASM, same salt ❌
+Can a deployer deploys 2 contracts with same WASM and same salt?
+
+Answer: **❌ No!**
+
+Check `test_deploy_from_contract_twice_same_wasm_same_salt_should_panic`
+
+## 3. Different WASM, same salt ❌
+
+Can a deployer deploys 2 different contracts (different WASM) with same salt?
+
+Answer: **❌ No!**
+
+Check `test_deploy_from_contract_different_wasm_same_salt_should_panic`
+
+This proves that in fact **the contract addresses does not depend on the WASM, but on the combination of address & salt**
+
+
+## 4. Two deployers, same WASM, same salt ✅
+Can one deployer deploys a (wasm/salt) and another deployer deploys the same (wasm/salt)?
+
+Answer: **✅ Yes!**
+
+Check `test_deploy_from_two_contract_deployers_same_wasm_same_salt`
+
 They have indeed different contract addreess, because, again, the contract address depends on the combination of address&salt.!!
 
+## 5. Calculate a deterministic address
+___
+___
 
+### Errors:
 
 In the tests we don't see the panic error, because we test that we panic.
 Here is the error when you want to deploy two contracts that will have the same address

@@ -28,17 +28,20 @@ mod contract_b {
     );
 }
 
-// pub fn calculate_address(
-//     env: Env, 
-//     deployer: Address,
-//     salt: BytesN<32>,
-// ) -> Address {
+pub fn calculate_address(
+    env: Env, 
+    deployer: Address,
+    salt: BytesN<32>,
+) -> Address {
    
-//     let contract_id_preimage = ContractIdPreimage::Address(ContractIdPreimageFromAddress {address: deployer.try_into().unwrap(), salt: Uint256(salt.into())});
-//     let bytes = Bytes::from_slice(&env, &contract_id_preimage.to_xdr().unwrap());
-//     let contract_address = Address::from_contract_id(&env.crypto().sha256(&bytes));
-//     contract_address
-// }
+    let deployer_with_address = env.deployer().with_address(deployer.clone(), salt);
+    
+    // Calculate deterministic address:
+    // This function can be called at anytime, before or after the contract is deployed, because contract addresses are deterministic.
+    // https://docs.rs/soroban-sdk/20.0.0-rc2/soroban_sdk/deploy/struct.DeployerWithAddress.html#method.deployed_address
+    let deterministic_address = deployer_with_address.deployed_address();
+    deterministic_address
+}
 
 #[test]
 fn test_deploy_from_contract() {
@@ -298,20 +301,32 @@ fn test_deploy_from_two_contract_deployers_same_wasm_same_salt() {
 }
 
 
-// #[test]
-// fn test_calculate_address() {
-//     let env = Env::default();
-//     let deployer_client = DeployerClient::new(&env, &env.register_contract(None, Deployer));
-    
-//     let wasm_hash = env.deployer().upload_contract_wasm(contract::WASM);
+#[test]
+fn test_calculate_address() {
+    let env = Env::default();
+    let wasm_hash = env.deployer().upload_contract_wasm(contract::WASM);
 
+    let deployer_client = DeployerClient::new(&env, &env.register_contract(None, Deployer));
+    let salt = BytesN::from_array(&env, &[0; 32]);
+    let init_fn = symbol_short!("init");
+    let init_fn_args: Vec<Val> = (5u32,).into_val(&env);
+    env.mock_all_auths();
 
-//     // We will have the same salt, init_fn and init_fn_args for the two deployments
-//     let salt = BytesN::from_array(&env, &[0; 32]);
-//     let calculated_address=calculate_address(env.clone(), deployer_client.address, salt.clone());
+    // Pre-calculate the address before deploying
+    let calculated_address=calculate_address(env.clone(), deployer_client.address.clone(), salt.clone());
 
+    // Deploy
+    let (contract_id,_init_result) =deployer_client.deploy(
+        &deployer_client.address,
+        &wasm_hash,
+        &salt,
+        &init_fn,
+        &init_fn_args,
+    );
 
-// }
+    // Check that pre calculated address is the same as the new deployed contract address
+    assert_eq!(calculated_address, contract_id);
+}
 
 
  

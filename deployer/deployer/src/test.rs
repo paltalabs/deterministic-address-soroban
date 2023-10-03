@@ -5,10 +5,11 @@ extern crate std;
 use crate::{Deployer, DeployerClient};
 use alloc::vec;
 use soroban_sdk::{
+    Bytes,
     symbol_short,
     testutils::{Address as _, AuthorizedFunction, AuthorizedInvocation},
     xdr::{self, ContractIdPreimage, ContractIdPreimageFromAddress, CreateContractArgs, Uint256},
-    Address, BytesN, Env, IntoVal, Val, Vec, deploy::DeployerWithAddress
+    Address, BytesN, Env, IntoVal, Val, Vec// deploy::DeployerWithAddress
 };
 
 // The contract that will be deployed by the deployer contract.
@@ -27,18 +28,17 @@ mod contract_b {
     );
 }
 
-pub fn deployer_with_address(
-    env: Env, 
-    deployer: Address,
-    salt: BytesN<32>,
-) -> DeployerWithAddress {
+// pub fn calculate_address(
+//     env: Env, 
+//     deployer: Address,
+//     salt: BytesN<32>,
+// ) -> Address {
    
-    // Calculate the DeployerWithAddress object
-    let deployer_with_address = env
-        .deployer()
-        .with_address(deployer, salt);
-    deployer_with_address
-}
+//     let contract_id_preimage = ContractIdPreimage::Address(ContractIdPreimageFromAddress {address: deployer.try_into().unwrap(), salt: Uint256(salt.into())});
+//     let bytes = Bytes::from_slice(&env, &contract_id_preimage.to_xdr().unwrap());
+//     let contract_address = Address::from_contract_id(&env.crypto().sha256(&bytes));
+//     contract_address
+// }
 
 #[test]
 fn test_deploy_from_contract() {
@@ -298,20 +298,20 @@ fn test_deploy_from_two_contract_deployers_same_wasm_same_salt() {
 }
 
 
-#[test]
-fn test_calculate_address() {
-    let env = Env::default();
-    let deployer_client = DeployerClient::new(&env, &env.register_contract(None, Deployer));
+// #[test]
+// fn test_calculate_address() {
+//     let env = Env::default();
+//     let deployer_client = DeployerClient::new(&env, &env.register_contract(None, Deployer));
     
-    let wasm_hash = env.deployer().upload_contract_wasm(contract::WASM);
+//     let wasm_hash = env.deployer().upload_contract_wasm(contract::WASM);
 
 
-    // We will have the same salt, init_fn and init_fn_args for the two deployments
-    let salt = BytesN::from_array(&env, &[0; 32]);
-    let deployer_address=deployer_with_address(env.clone(), deployer_client.address, salt.clone());
-
-    deployer_address.
-
-}
+//     // We will have the same salt, init_fn and init_fn_args for the two deployments
+//     let salt = BytesN::from_array(&env, &[0; 32]);
+//     let calculated_address=calculate_address(env.clone(), deployer_client.address, salt.clone());
 
 
+// }
+
+
+ 

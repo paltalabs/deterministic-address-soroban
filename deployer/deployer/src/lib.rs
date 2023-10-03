@@ -16,7 +16,7 @@ impl Deployer {
     ///
     /// Returns the contract ID and result of the init function.
     pub fn deploy(
-        env: Env, 
+        env: Env,
         deployer: Address,
         wasm_hash: BytesN<32>,
         salt: BytesN<32>,

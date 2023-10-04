@@ -40,6 +40,22 @@ impl Deployer {
         // invoking the init result.
         (deployed_address, res)
     }
+
+    pub fn calculate_address(
+        env: Env, 
+        deployer: Address,
+        salt: BytesN<32>,
+    ) -> Address {
+       
+        let deployer_with_address = env.deployer().with_address(deployer.clone(), salt);
+        
+        // Calculate deterministic address:
+        // This function can be called at anytime, before or after the contract is deployed, because contract addresses are deterministic.
+        // https://docs.rs/soroban-sdk/20.0.0-rc2/soroban_sdk/deploy/struct.DeployerWithAddress.html#method.deployed_address
+        let deterministic_address = deployer_with_address.deployed_address();
+        deterministic_address
+    }
+    
 }
 
 mod test;

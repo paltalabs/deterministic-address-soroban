@@ -1,7 +1,12 @@
 # deterministic-address-soroban
 Playground in order to experiment deterministic contract addresses in Soroban, the smart contract platform in the Stellar Blockchain
 
-All the code of this Playground is currently supporting Soroban Preview 10:
+All the code of this Playground is currently supporting Soroban Preview 11:
+
+In this repo you'll find
+- 2 dummy contracts to be deployed `deployer/contract` and `deployer/contract_b`
+- 1 factory contract that will deploy these dummy contracts `deployer/deployer`
+- 1 test script that will be used for our research `deployer/deployer/test.rs`
 
 
 ```
@@ -56,6 +61,33 @@ Check `test_deploy_from_two_contract_deployers_same_wasm_same_salt`
 They have indeed different contract addreess, because, again, the contract address depends on the combination of address&salt.!!
 
 ## 5. Calculate a deterministic address
+Can we calculate the address of a contract only knowing the address of the factory that will (or that already did) deploy the contract and the salt used (or to be used)?
+
+Answer: **✅ Yes!**
+
+Check `test_calculate_address`
+
+After `soroban-sdk = { version = "20.0.0-rc2" }`, we can use the `deployed_address` method for a `DeployerWithAddress` struct. For more information please check the documentation here: https://docs.rs/soroban-sdk/20.0.0-rc2/soroban_sdk/deploy/struct.DeployerWithAddress.html#method.deployed_address
+
+This can be used like this:
+
+```
+pub fn calculate_address(
+    env: Env, 
+    deployer: Address,
+    salt: BytesN<32>,
+) -> Address {
+   
+    let deployer_with_address = env.deployer().with_address(deployer.clone(), salt);
+    
+    // Calculate deterministic address:
+    // This function can be called at anytime, before or after the contract is deployed, because contract addresses are deterministic.
+    // https://docs.rs/soroban-sdk/20.0.0-rc2/soroban_sdk/deploy/struct.DeployerWithAddress.html#method.deployed_address
+    let deterministic_address = deployer_with_address.deployed_address();
+    deterministic_address
+}
+```
+
 ___
 ___
 

@@ -1,6 +1,10 @@
 # deterministic-address-soroban
 Playground in order to experiment deterministic contract addresses in Soroban, the smart contract platform in the Stellar Blockchain
 
+In Soroban, when an smart contract is being deployed by another smart contract (usually called Deployer or Factory), the address of the new smart contract can be determined by the address of the deployer contract plus "salt".  A "salt" in this context is usually is a random or unique value that is combined with the deployer's contract address to create a deterministic, yet distinct, identifier for the smart contract to be deployed.
+
+So.... how can we play with this deterministic contract addresses?
+
 All the code of this Playground is currently supporting Soroban Preview 11:
 
 In this repo you'll find
